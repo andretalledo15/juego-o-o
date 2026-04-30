@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Punk - Emojis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: radial-gradient(circle at 20% 80%, #8b5cf6 0%, #1e1b4b 50%, #0f0f23 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(15, 15, 35, 0.95);
+            border: 2px solid #8b5cf6;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.5), inset 0 0 30px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #ffeb3b;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #ffeb3b, 2px 2px 4px #000;
+            letter-spacing: 3px;
+        }
+
+        .level-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            background: linear-gradient(145deg, #6b7280, #4b5563);
+            color: #fff;
+            border: 2px solid #8b5cf6;
+            padding: 12px 20px;
+            font-size: 1em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .level-btn:hover, .level-btn.active {
+            background: linear-gradient(145deg, #8b5cf6, #a78bfa);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 25px;
+            font-size: 1.1em;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stat {
+            background: linear-gradient(145deg, #374151, #1f2937);
+            color: #ffeb3b;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 1px solid #8b5cf6;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 25px;
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 20px;
+            border: 2px solid #8b5cf6;
+            box-shadow: inset 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #6b7280, #4b5563);
+            border: 3px solid #8b5cf6;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2em; /* EMOJIS MÁS GRANDES */
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.1);
+            transition: all 0.4s ease;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* **SIGNO DE PREGUNTA SOLO EN TARJETAS CERRADAS** */
+        .card:not(.flipped)::before {
+            content: '?';
+            position: absolute;
+            font-size: 2.8em;
+            color: #ffeb3b;
+            text-shadow: 3px 3px 6px #000;
+            z-index: 1;
+            pointer-events: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* **EMOJI SIEMPRE DETRÁS DEL "?" CUANDO ESTÁ CERRADA** */
+        .emoji-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 2.5em;
+        }
+
+        /* **AL VOLTEAR: FONDO BLANCO + EMOJI VISIBLE + "?" DESAPARECE** */
+        .card.flipped {
+            background: #ffffff !important;
+            border-color: #10b981;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            transform: scale(0.98);
+        }
+
+        .card.flipped .emoji-text {
+            opacity: 1 !important;
+            z-index: 3;
+        }
+
+        .card.flipped::before {
+            opacity: 0 !important;
+        }
+
+        .card.matched {
+            background: linear-gradient(145deg, #f59e0b, #d97706) !important;
+            cursor: default;
+            animation: matchedAnim 0.6s ease-out;
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+            border-color: #f59e0b;
+        }
+
+        @keyframes matchedAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(0.95); }
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #8b5cf6, #a78bfa);
+            color: #fff;
+            border: 2px solid #c084fc;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.5);
+            text-shadow: 1px 1px 2px #000;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.7);
+        }
+
+        .message {
+            margin-top: 25px;
+            font-size: 1.4em;
+            font-weight: bold;
+            min-height: 50px;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .win { 
+            color: #10b981; 
+            animation: celebrate 0.8s infinite; 
+            text-shadow: 0 0 20px #10b981;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @media (max-width: 600px) {
+            .game-board {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                max-width: 350px;
+            }
+            .card { font-size: 1.8em; }
+            .card:not(.flipped)::before { font-size: 2.2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🍎 MEMORY PUNK</h1>
+        
+        <div class="level-selector">
+            <button class="level-btn active" data-level="easy">🐣 FÁCIL 3x4</button>
+            <button class="level-btn" data-level="medium">🧩 MEDIO 4x4</button>
+            <button class="level-btn" data-level="hard">💀 DIFÍCIL 5x5</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">Nivel: <span id="levelName">Fácil</span></div>
+            <div class="stat">Movs: <span id="moves">0</span></div>
+            <div class="stat">Pares: <span id="pairs">0</span></div>
+            <div class="stat">Tiempo: <span id="time">00:00</span></div>
+        </div>
+
+        <div class="game-board" id="gameBoard"></div>
+
+        <div class="controls">
+            <button id="newGame">🔥 NUEVO JUEGO</button>
+        </div>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        class MemoryGame {
+            constructor() {
+                // **EMOJIS DE FRUTAS Y FLORES**
+                this.emojis = [
+                    '🍎', '🍌', '🍊', '🍇', '🍓', '🍉', 
+                    '🍍', '🥝', '🍒', '🍑', '🥭', '🍈',
+                    '🌸', '🌺', '🌻', '🌹', '🌼', '🍋'
+                ];
+                this.levels = {
+                    easy: { rows: 3, cols: 4, totalCards: 12 },
+                    medium: { rows: 4, cols: 4, totalCards: 16 },
+                    hard: { rows: 5, cols: 5, totalCards: 25 }
+                };
+                this.currentLevel = 'easy';
+                this.cards = [];
+                this.flippedCards = [];
+                this.matchedPairs = 0;
+                this.moves = 0;
+                this.timer = 0;
+                this.timerInterval = null;
+                this.gameActive = true;
+                
+                this.init();
+            }
+
+            init() {
+                this.createBoard();
+                this.resetStats();
+                this.startTimer();
+            }
+
+            setLevel(level) {
+                this.currentLevel = level;
+                const levelInfo = this.levels[level];
+                document.getElementById('levelName').textContent = 
+                    level === 'easy' ? 'Fácil' : 
+                    level === 'medium' ? 'Medio' : 'Difícil';
+                this.restart();
+            }
+
+            createBoard() {
+                const gameBoard = document.getElementById('gameBoard');
+                const levelInfo = this.levels[this.currentLevel];
+                gameBoard.style.gridTemplateColumns = `repeat(${levelInfo.cols}, 1fr)`;
+                gameBoard.style.gridTemplateRows = `repeat(${levelInfo.rows}, 1fr)`;
+                gameBoard.innerHTML = '';
+
+                const totalPairs = Math.floor(levelInfo.totalCards / 2);
+                let gameEmojis = [];
+                for (let i = 0; i < totalPairs; i++) {
+                    const emoji = this.emojis[i % this.emojis.length];
+                    gameEmojis.push(emoji, emoji);
+                }
+                // Ajustar para 25 tarjetas en difícil
+                if (levelInfo.totalCards === 25) {
+                    gameEmojis.push(this.emojis[0]);
+                }
+                gameEmojis.sort(() => Math.random() - 0.5);
+
+                this.cards = [];
+                gameEmojis.slice(0, levelInfo.totalCards).forEach((emoji, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.emoji = emoji;
+                    card.innerHTML = `<span class="emoji-text">${emoji}</span>`;
+                    
+                    card.addEventListener('click', () => this.flipCard(card));
+                    gameBoard.appendChild(card);
+                    this.cards.push(card);
+                });
+            }
+
+            flipCard(card) {
+                if (!this.gameActive || 
+                    card.classList.contains('flipped') || 
+                    card.classList.contains('matched') || 
+                    this.flippedCards.length >= 2) {
+                    return;
+                }
+
+                card.classList.add('flipped');
+                this.flippedCards.push(card);
+
+                if (this.flippedCards.length === 2) {
+                    this.moves++;
+                    this.updateStats();
+                    setTimeout(() => this.checkForMatch(), 800);
+                }
+            }
+
+            checkForMatch() {
+                const [card1, card2] = this.flippedCards;
+                
+                if (card1.dataset.emoji === card2.dataset.emoji) {
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    this.matchedPairs++;
+                    
+                    const levelInfo = this.levels[this.currentLevel];
+                    const totalPairs = Math.floor(levelInfo.totalCards / 2);
+                    if (this.matchedPairs >= totalPairs) {
+                        this.gameWon();
+                    }
+                } else {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                }
+                
+                this.flippedCards = [];
+                this.updateStats();
+            }
+
+            updateStats() {
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('pairs').textContent = this.matchedPairs;
+            }
+
+            resetStats() {
+                this.moves = 0;
+                this.matchedPairs = 0;
+                this.timer = 0;
+                this.flippedCards = [];
+                document.getElementById('message').textContent = '';
+                document.getElementById('message').className = 'message';
+            }
+
+            startTimer() {
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
+                    this.timer++;
+                    const minutes = Math.floor(this.timer / 60);
+                    const seconds = this.timer % 60;
+                    document.getElementById('time').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            gameWon() {
+                this.gameActive = false;
+                clearInterval(this.timerInterval);
+                const message = document.getElementById('message');
+                message.innerHTML = `🎸 <strong>¡VICTORIA PUNK!</strong><br>${this.moves} MOVS • ${this.timer} SEG`;
+                message.className = 'message win';
+            }
+
+            restart() {
+                clearInterval(this.timerInterval);
+                this.gameActive = true;
+                this.createBoard();
+                this.resetStats();
+                this.startTimer();
+            }
+        }
+
+        let game;
+
+        function initGame() {
+            game = new MemoryGame();
+            
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    game.setLevel(btn.dataset.level);
+                };
+            });
+            
+            document.getElementById('newGame').onclick = () => {
+                game.restart();
+            };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initGame);
+        } else {
+            initGame();
+        }
+    </script>
+</body>
+</html>
