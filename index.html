@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Punk - Emojis</title>
+    <title>Memory Cards</title>
     <style>
         * {
             margin: 0;
@@ -24,6 +24,20 @@
             color: #fff;
         }
 
+        /* **MENÚ INICIAL** */
+        .menu-container {
+            background: rgba(15, 15, 35, 0.95);
+            border: 2px solid #5cf6b6;
+            border-radius: 20px;
+            padding: 50px 30px;
+            box-shadow: 0 0 50px rgba(139, 92, 246, 0.5), inset 0 0 30px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        /* **JUEGO** */
         .game-container {
             background: rgba(15, 15, 35, 0.95);
             border: 2px solid #8b5cf6;
@@ -34,42 +48,49 @@
             max-width: 700px;
             width: 100%;
             backdrop-filter: blur(10px);
+            display: none; /* OCULTO AL INICIO */
         }
 
         h1 {
             color: #ffeb3b;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-size: 2.8em;
             text-shadow: 0 0 20px #ffeb3b, 2px 2px 4px #000;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+        }
+
+        .menu-title {
+            font-size: 3em;
+            margin-bottom: 40px;
         }
 
         .level-selector {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 300px;
+            margin: 0 auto;
         }
 
         .level-btn {
             background: linear-gradient(145deg, #6b7280, #4b5563);
             color: #fff;
             border: 2px solid #8b5cf6;
-            padding: 12px 20px;
-            font-size: 1em;
+            padding: 20px 30px;
+            font-size: 1.4em;
             border-radius: 15px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
             text-shadow: 1px 1px 2px #000;
+            letter-spacing: 1px;
         }
 
         .level-btn:hover, .level-btn.active {
             background: linear-gradient(145deg, #8b5cf6, #a78bfa);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.6);
         }
 
         .stats {
@@ -112,7 +133,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.2em; /* EMOJIS MÁS GRANDES */
+            font-size: 2.2em;
             box-shadow: 0 8px 25px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.1);
             transition: all 0.4s ease;
             user-select: none;
@@ -120,7 +141,6 @@
             overflow: hidden;
         }
 
-        /* **SIGNO DE PREGUNTA SOLO EN TARJETAS CERRADAS** */
         .card:not(.flipped)::before {
             content: '?';
             position: absolute;
@@ -134,7 +154,6 @@
             transform: translate(-50%, -50%);
         }
 
-        /* **EMOJI SIEMPRE DETRÁS DEL "?" CUANDO ESTÁ CERRADA** */
         .emoji-text {
             position: absolute;
             top: 50%;
@@ -146,7 +165,6 @@
             font-size: 2.5em;
         }
 
-        /* **AL VOLTEAR: FONDO BLANCO + EMOJI VISIBLE + "?" DESAPARECE** */
         .card.flipped {
             background: #ffffff !important;
             border-color: #10b981;
@@ -222,7 +240,7 @@
 
         @media (max-width: 600px) {
             .game-board {
-                grid-template-columns: repeat(5, 1fr);
+                grid-template-columns: repeat(6, 1fr);
                 gap: 8px;
                 max-width: 350px;
             }
@@ -232,15 +250,22 @@
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🍎 MEMORY PUNK</h1>
+    <!-- **MENÚ INICIAL** -->
+    <div class="menu-container" id="menuContainer">
+        <h1 class="menu-title">🧠 MEMORY CARDS</h1>
+        <p style="font-size: 1.3em; margin-bottom: 40px; opacity: 0.9;">Selecciona tu nivel de dificultad</p>
         
         <div class="level-selector">
-            <button class="level-btn active" data-level="easy">🐣 FÁCIL 3x4</button>
-            <button class="level-btn" data-level="medium">🧩 MEDIO 4x4</button>
-            <button class="level-btn" data-level="hard">💀 DIFÍCIL 5x5</button>
+            <button class="level-btn" data-level="easy">🐣 FÁCIL</button>
+            <button class="level-btn" data-level="medium">🧩 MEDIO</button>
+            <button class="level-btn" data-level="hard">💀 DIFÍCIL</button>
         </div>
+    </div>
 
+    <!-- **JUEGO (OCULTO AL INICIO)** -->
+    <div class="game-container" id="gameContainer">
+        <h1>🍎 MEMORY CARDS</h1>
+        
         <div class="stats">
             <div class="stat">Nivel: <span id="levelName">Fácil</span></div>
             <div class="stat">Movs: <span id="moves">0</span></div>
@@ -252,6 +277,7 @@
 
         <div class="controls">
             <button id="newGame">🔥 NUEVO JUEGO</button>
+            <button id="backToMenu" style="background: linear-gradient(145deg, #ef4444, #dc2626); margin-left: 10px;">🏠 MENÚ</button>
         </div>
 
         <div class="message" id="message"></div>
@@ -260,7 +286,6 @@
     <script>
         class MemoryGame {
             constructor() {
-                // **EMOJIS DE FRUTAS Y FLORES**
                 this.emojis = [
                     '🍎', '🍌', '🍊', '🍇', '🍓', '🍉', 
                     '🍍', '🥝', '🍒', '🍑', '🥭', '🍈',
@@ -269,7 +294,7 @@
                 this.levels = {
                     easy: { rows: 3, cols: 4, totalCards: 12 },
                     medium: { rows: 4, cols: 4, totalCards: 16 },
-                    hard: { rows: 5, cols: 5, totalCards: 25 }
+                    hard: { rows: 5, cols: 6, totalCards: 30 }
                 };
                 this.currentLevel = 'easy';
                 this.cards = [];
@@ -279,8 +304,6 @@
                 this.timer = 0;
                 this.timerInterval = null;
                 this.gameActive = true;
-                
-                this.init();
             }
 
             init() {
@@ -311,8 +334,7 @@
                     const emoji = this.emojis[i % this.emojis.length];
                     gameEmojis.push(emoji, emoji);
                 }
-                // Ajustar para 25 tarjetas en difícil
-                if (levelInfo.totalCards === 25) {
+                if (levelInfo.totalCards % 2 === 1) {
                     gameEmojis.push(this.emojis[0]);
                 }
                 gameEmojis.sort(() => Math.random() - 0.5);
@@ -399,7 +421,7 @@
                 this.gameActive = false;
                 clearInterval(this.timerInterval);
                 const message = document.getElementById('message');
-                message.innerHTML = `🎸 <strong>¡VICTORIA PUNK!</strong><br>${this.moves} MOVS • ${this.timer} SEG`;
+                message.innerHTML = ` <strong>¡VICTORIA!</strong><br>${this.moves} MOVS • ${this.timer} SEG`;
                 message.className = 'message win';
             }
 
@@ -413,28 +435,36 @@
         }
 
         let game;
+        const menuContainer = document.getElementById('menuContainer');
+        const gameContainer = document.getElementById('gameContainer');
 
-        function initGame() {
-            game = new MemoryGame();
-            
-            document.querySelectorAll('.level-btn').forEach(btn => {
-                btn.onclick = () => {
-                    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    game.setLevel(btn.dataset.level);
-                };
-            });
-            
-            document.getElementById('newGame').onclick = () => {
-                game.restart();
+        // **MENÚ - Seleccionar nivel**
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.onclick = () => {
+                // Ocultar menú, mostrar juego
+                menuContainer.style.display = 'none';
+                gameContainer.style.display = 'block';
+                
+                // Inicializar juego con nivel seleccionado
+                game = new MemoryGame();
+                game.setLevel(btn.dataset.level);
+                document.getElementById('levelName').textContent = 
+                    btn.dataset.level === 'easy' ? 'Fácil' : 
+                    btn.dataset.level === 'medium' ? 'Medio' : 'Difícil';
             };
-        }
+        });
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initGame);
-        } else {
-            initGame();
-        }
+        // **Botón Nuevo Juego**
+        document.getElementById('newGame').onclick = () => {
+            game.restart();
+        };
+
+        // **Botón Volver al Menú**
+        document.getElementById('backToMenu').onclick = () => {
+            gameContainer.style.display = 'none';
+            menuContainer.style.display = 'block';
+            clearInterval(game.timerInterval);
+        };
     </script>
 </body>
 </html>
